@@ -49,9 +49,9 @@ return {
 					-- Keymaps для всех LSP серверов
 					vim.keymap.set("n", "<leader>i", vim.lsp.buf.hover, { buffer = bufnr, desc = "Hover [I]nfo" })
 
-					vim.keymap.set({ "n", "v" }, "<leader>lf", function()
+					vim.keymap.set({ "n", "v" }, "<leader>f", function()
 						vim.lsp.buf.format({ async = false })
-					end, { buffer = bufnr, desc = "[L]SP [F]ormat" })
+					end, { buffer = bufnr, desc = "LSP [F]ormat" })
 
 					vim.keymap.set(
 						{ "n", "v" },
@@ -62,9 +62,9 @@ return {
 
 					vim.keymap.set(
 						{ "n", "v" },
-						"<leader>ld",
+						"<leader>d",
 						vim.diagnostic.open_float,
-						{ buffer = bufnr, desc = "[L]SP [D]iagnostics" }
+						{ buffer = bufnr, desc = "LSP [D]iagnostics" }
 					)
 
 					-- Дополнительные keymaps по желанию
@@ -111,7 +111,6 @@ return {
 			-- Lua
 			vim.lsp.config("lua_ls", {
 				capabilities = capabilities,
-				on_attach = on_attach,
 				settings = {
 					Lua = {
 						telemetry = { enable = false },
@@ -126,7 +125,6 @@ return {
 			-- Clangd (C/C++)
 			vim.lsp.config("clangd", {
 				capabilities = capabilities,
-				on_attach = on_attach,
 				cmd = {
 					"clangd",
 					"--background-index",
@@ -144,7 +142,6 @@ return {
 			-- ESLint
 			vim.lsp.config("eslint", {
 				capabilities = capabilities,
-				on_attach = on_attach,
 				settings = {
 					eslint = {
 						validate = "on",
@@ -159,24 +156,12 @@ return {
 			-- Svelte
 			vim.lsp.config("svelte", {
 				capabilities = capabilities,
-				on_attach = function(client, bufnr)
-					on_attach(client, bufnr) -- Общие keymaps
-
-					-- Автоформатирование при сохранении
-					vim.api.nvim_create_autocmd("BufWritePre", {
-						buffer = bufnr,
-						callback = function()
-							vim.lsp.buf.format({ async = false })
-						end,
-					})
-				end,
 			})
 			vim.lsp.enable("svelte")
 
 			-- TypeScript/JavaScript
 			vim.lsp.config("ts_ls", {
 				capabilities = capabilities,
-				on_attach = on_attach,
 
 				-- Ключевые настройки для JS!
 				init_options = {

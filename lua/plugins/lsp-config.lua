@@ -22,7 +22,6 @@ return {
 					"svelte",
 					"pyright",
 					"emmet_language_server",
-					"eslint",
 					"ts_ls",
 				},
 			})

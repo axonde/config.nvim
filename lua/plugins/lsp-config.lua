@@ -23,6 +23,7 @@ return {
 					"pyright",
 					"emmet_language_server",
 					"ts_ls",
+					"csharp_ls",
 				},
 			})
 		end,
@@ -191,6 +192,31 @@ return {
 				},
 			})
 			vim.lsp.enable("ts_ls")
+
+			vim.lsp.config("csharp_ls", {
+				capabilities = capabilities,
+				settings = {
+					csharp = {
+						solution = (function()
+							-- Получаем корень от текущего файла
+							local root = vim.fs.root(vim.api.nvim_buf_get_name(0), {
+								"*.slnx",
+								"*.sln",
+								"*.csproj",
+								"*.fsproj",
+								".git",
+							})
+
+							if root then
+								local files = vim.fn.glob(root .. "/*.sln*", false, true)
+								return files[1] or nil
+							end
+							return nil
+						end)(),
+						applyFormattingOptions = true,
+					},
+				},
+			})
 		end,
 	},
 }

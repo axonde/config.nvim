@@ -24,6 +24,7 @@ return {
                     "emmet_language_server",
                     "ts_ls",
                     "csharp_ls",
+                    "jdtls",
                 },
             })
         end,
@@ -210,6 +211,39 @@ return {
                 capabilities = capabilities,
             })
             vim.lsp.enable("dartls")
+
+            -- Set Java
+            local java_home = os.getenv('JAVA_HOME')
+            local mason_path = vim.fn.stdpath('data') .. '/mason/packages/jdtls'
+
+            vim.lsp.config("jdtls", {
+                cmd = {
+                    java_home .. '/bin/java', -- (1) Какая Java запускает сервер
+                    '-Declipse.application=org.eclipse.jdt.ls.core.id1',
+                    '-Dosgi.bundles.defaultStartLevel=4',
+                    '-Xmx1g',
+                    '--add-modules=ALL-SYSTEM',
+                    '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+                    '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+                    '-jar', vim.fn.glob(mason_path .. '/plugins/org.eclipse.equinox.launcher_*.jar'),             -- (2) Где сам JDTLS
+                    '-configuration', mason_path .. '/config_mac',                                                -- (3) Конфигурация Eclipse
+                    '-data', vim.fn.stdpath('cache') ..
+                '/jdtls-workspace/' .. vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t'),                             -- (4) Рабочая папка проекта
+                },
+                root_dir = vim.fs.dirname(vim.fs.find({ '.git', 'mvnw', 'gradlew' }, { upward = true })[1]) or
+                vim.fn.getcwd(),
+                capabilities = capabilities,
+                settings = {
+                    java = {
+                        configuration = {
+                            runtimes = { -- (5) JDK для компиляции проекта
+                                { name = 'JavaSE-21', path = java_home, default = true },
+                            }
+                        }
+                    }
+                }
+            })
+            vim.lsp.enable('jdtls')
         end,
     },
 }

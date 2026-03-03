@@ -216,30 +216,72 @@ return {
             local java_home = os.getenv('JAVA_HOME')
             local mason_path = vim.fn.stdpath('data') .. '/mason/packages/jdtls'
 
+            -- Поиск Lombok в глобальном кеше Gradle
+            local function find_lombok_jar()
+                local gradle_cache = (os.getenv('GRADLE_USER_HOME') or (os.getenv('HOME') .. '/.gradle')) .. '/caches'
+                local jars = vim.fs.find(function(name, _path)
+                    return name:match('^lombok-.*%.jar$') ~= nil
+                end, { path = gradle_cache, type = 'file', depth = 10 })
+
+                if #jars > 0 then
+                    -- Берём самый свежий (по времени модификации)
+                    table.sort(jars, function(a, b)
+                        local stat_a = vim.uv.fs_stat(a) or { mtime = { sec = 0 } }
+                        local stat_b = vim.uv.fs_stat(b) or { mtime = { sec = 0 } }
+                        return stat_a.mtime.sec > stat_b.mtime.sec
+                    end)
+                    return jars[1]
+                end
+                return nil
+            end
+
+            local lombok_jar = find_lombok_jar()
+
+            local cmd = {
+                java_home .. '/bin/java',
+                '-Declipse.application=org.eclipse.jdt.ls.core.id1',
+                '-Dosgi.bundles.defaultStartLevel=4',
+                '-Xmx1g',
+                '--add-modules=ALL-SYSTEM',
+                '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+                '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+            }
+
+            if lombok_jar then
+                table.insert(cmd, '-javaagent:' .. lombok_jar)
+            else
+                vim.notify('⚠️ Lombok jar not found in Gradle cache. Run a build first.', vim.log.levels.WARN)
+            end
+
+            table.insert(cmd, '-jar')
+            table.insert(cmd, vim.fn.glob(mason_path .. '/plugins/org.eclipse.equinox.launcher_*.jar'))
+            table.insert(cmd, '-configuration')
+            table.insert(cmd, mason_path .. '/config_mac')
+            table.insert(cmd, '-data')
+            table.insert(cmd,
+                vim.fn.stdpath('cache') .. '/jdtls-workspace/' .. vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t'))
+
             vim.lsp.config("jdtls", {
-                cmd = {
-                    java_home .. '/bin/java', -- (1) Какая Java запускает сервер
-                    '-Declipse.application=org.eclipse.jdt.ls.core.id1',
-                    '-Dosgi.bundles.defaultStartLevel=4',
-                    '-Xmx1g',
-                    '--add-modules=ALL-SYSTEM',
-                    '--add-opens', 'java.base/java.util=ALL-UNNAMED',
-                    '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
-                    '-jar', vim.fn.glob(mason_path .. '/plugins/org.eclipse.equinox.launcher_*.jar'),             -- (2) Где сам JDTLS
-                    '-configuration', mason_path .. '/config_mac',                                                -- (3) Конфигурация Eclipse
-                    '-data', vim.fn.stdpath('cache') ..
-                '/jdtls-workspace/' .. vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t'),                             -- (4) Рабочая папка проекта
-                },
+                cmd = cmd,
                 root_dir = vim.fs.dirname(vim.fs.find({ '.git', 'mvnw', 'gradlew' }, { upward = true })[1]) or
-                vim.fn.getcwd(),
+                    vim.fn.getcwd(),
                 capabilities = capabilities,
                 settings = {
                     java = {
                         configuration = {
-                            runtimes = { -- (5) JDK для компиляции проекта
+                            runtimes = {
                                 { name = 'JavaSE-21', path = java_home, default = true },
                             }
-                        }
+                        },
+                        import = {
+                            gradle = {
+                                enabled = true,
+                                wrapper = { enabled = true },
+                            },
+                        },
+                        eclipse = {
+                            downloadSources = true,
+                        },
                     }
                 }
             })

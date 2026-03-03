@@ -219,18 +219,12 @@ return {
             -- Поиск Lombok в глобальном кеше Gradle
             local function find_lombok_jar()
                 local gradle_cache = (os.getenv('GRADLE_USER_HOME') or (os.getenv('HOME') .. '/.gradle')) .. '/caches'
-                local jars = vim.fs.find(function(name, _path)
-                    return name:match('^lombok-.*%.jar$') ~= nil
-                end, { path = gradle_cache, type = 'file', depth = 10 })
-
+                -- Точный путь с wildcard: modules-2/files-2.1/org.projectlombok/lombok/*/*/lombok-*.jar
+                local pattern = gradle_cache .. '/modules-2/files-2.1/org.projectlombok/lombok/*/*/lombok-*.jar'
+                local jars = vim.fn.glob(pattern, false, true)
                 if #jars > 0 then
-                    -- Берём самый свежий (по времени модификации)
-                    table.sort(jars, function(a, b)
-                        local stat_a = vim.uv.fs_stat(a) or { mtime = { sec = 0 } }
-                        local stat_b = vim.uv.fs_stat(b) or { mtime = { sec = 0 } }
-                        return stat_a.mtime.sec > stat_b.mtime.sec
-                    end)
-                    return jars[1]
+                    -- Берём последний (самый свежий по версии, т.к. glob сортирует)
+                    return jars[#jars]
                 end
                 return nil
             end
@@ -261,6 +255,10 @@ return {
             table.insert(cmd,
                 vim.fn.stdpath('cache') .. '/jdtls-workspace/' .. vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t'))
 
+            vim.notify(
+                'root_dir: ' .. vim.fs.dirname(vim.fs.find({ '.git', 'mvnw', 'gradlew' }, { upward = true })[1]) or
+                vim.fn.getcwd(), vim.log.levels.INFO)
+
             vim.lsp.config("jdtls", {
                 cmd = cmd,
                 root_dir = vim.fs.dirname(vim.fs.find({ '.git', 'mvnw', 'gradlew' }, { upward = true })[1]) or
@@ -277,11 +275,21 @@ return {
                             gradle = {
                                 enabled = true,
                                 wrapper = { enabled = true },
-                            },
+                                java = {
+                                    compileOnly = {
+                                        enabled = true -- оставляем, но может не помочь
+                                    }
+                                }
+                            }
                         },
                         eclipse = {
                             downloadSources = true,
                         },
+                        project = {
+                            referencedLibraries = {
+                                lombok_jar -- добавляем путь к lombok.jar
+                            }
+                        }
                     }
                 }
             })

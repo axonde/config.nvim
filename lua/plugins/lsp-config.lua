@@ -255,10 +255,6 @@ return {
             table.insert(cmd,
                 vim.fn.stdpath('cache') .. '/jdtls-workspace/' .. vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t'))
 
-            vim.notify(
-                'root_dir: ' .. vim.fs.dirname(vim.fs.find({ '.git', 'mvnw', 'gradlew' }, { upward = true })[1]) or
-                vim.fn.getcwd(), vim.log.levels.INFO)
-
             vim.lsp.config("jdtls", {
                 cmd = cmd,
                 root_dir = vim.fs.dirname(vim.fs.find({ '.git', 'mvnw', 'gradlew' }, { upward = true })[1]) or

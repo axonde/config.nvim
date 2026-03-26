@@ -13,12 +13,14 @@ local function find_lombok_jar()
     local gradle_cache = (os.getenv('GRADLE_USER_HOME') or (os.getenv('HOME') .. '/.gradle')) .. '/caches'
     local pattern = gradle_cache .. '/modules-2/files-2.1/org.projectlombok/lombok/*/*/lombok-*.jar'
     local jars = vim.fn.glob(pattern, false, true)
-    if #jars > 0 then
-        return jars[#jars]
+    for _, jar in ipairs(jars) do
+        if not jar:match('%-sources%.jar$') then
+            return jar
+        end
     end
     return nil
 end
-local lombok_jar = find_lombok_jar()
+lombok_jar = find_lombok_jar()
 
 -- Формируем команду запуска jdtls
 local cmd = {

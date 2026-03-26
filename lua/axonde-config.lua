@@ -86,5 +86,8 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- diff command
+vim.cmd("command DiffOrig vert new | set bt=nofile | r ++edit # | 0d_ | diffthis | wincmd p | diffthis");
+
 -- Setup lazy.nvim (all plugins are in lua/plugins.lua)
 require("lazy").setup("plugins")

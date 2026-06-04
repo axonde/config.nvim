@@ -61,7 +61,7 @@ return {
         },
         config = function()
             require("mason-nvim-lint").setup({
-                ensure_installed = { "eslint_d" },
+                -- ensure_installed = { "eslint_d" }, // disabled by YANDEX
             })
         end,
     },

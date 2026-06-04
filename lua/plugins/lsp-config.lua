@@ -19,11 +19,11 @@ return {
                 ensure_installed = {
                     "lua_ls",
                     "clangd",
-                    "svelte",
-                    "pyright",
-                    "emmet_language_server",
-                    "ts_ls",
-                    "csharp_ls",
+                    -- "svelte",
+                    -- "pyright",
+                    -- "emmet_language_server",
+                    -- "ts_ls",
+                    -- "csharp_ls",
                     "jdtls",
                 },
             })
@@ -140,71 +140,74 @@ return {
             })
             vim.lsp.enable("clangd")
 
-            -- Svelte
-            vim.lsp.config("svelte", {
-                capabilities = capabilities,
-            })
-            vim.lsp.enable("svelte")
+            -- deactivated for YANDEX
+            -- -- Svelte
+            -- vim.lsp.config("svelte", {
+            --     capabilities = capabilities,
+            -- })
+            -- vim.lsp.enable("svelte")
 
-            -- TypeScript/JavaScript
-            vim.lsp.config("ts_ls", {
-                capabilities = capabilities,
+            -- deactivated for YANDEX
+            -- -- TypeScript/JavaScript
+            -- vim.lsp.config("ts_ls", {
+            --     capabilities = capabilities,
+            --
+            --     -- Ключевые настройки для JS!
+            --     init_options = {
+            --         preferences = {
+            --             includeCompletionsForModuleExports = true,
+            --             includeCompletionsWithInsertText = true,
+            --             -- Отключаем проверку типов в JS файлах
+            --             disableSuggestions = true,
+            --         },
+            --         -- Форсируем использование JSDoc вместо TS проверок
+            --         plugins = {
+            --             {
+            --                 name = "typescript-plugin",
+            --                 location = vim.fn.stdpath("data")
+            --                     .. "/mason/packages/typescript-language-server/node_modules/typescript-plugin",
+            --                 enableForJS = true,
+            --                 jsDocParsing = true,
+            --                 tsChecker = false, -- Выключаем проверщик типов!
+            --             },
+            --         },
+            --     },
+            --     -- Настройки для разных типов файлов
+            --     filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
+            --     settings = {
+            --         completions = {
+            --             completeFunctionCalls = true,
+            --         },
+            --     },
+            -- })
+            -- vim.lsp.enable("ts_ls")
 
-                -- Ключевые настройки для JS!
-                init_options = {
-                    preferences = {
-                        includeCompletionsForModuleExports = true,
-                        includeCompletionsWithInsertText = true,
-                        -- Отключаем проверку типов в JS файлах
-                        disableSuggestions = true,
-                    },
-                    -- Форсируем использование JSDoc вместо TS проверок
-                    plugins = {
-                        {
-                            name = "typescript-plugin",
-                            location = vim.fn.stdpath("data")
-                                .. "/mason/packages/typescript-language-server/node_modules/typescript-plugin",
-                            enableForJS = true,
-                            jsDocParsing = true,
-                            tsChecker = false, -- Выключаем проверщик типов!
-                        },
-                    },
-                },
-                -- Настройки для разных типов файлов
-                filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
-                settings = {
-                    completions = {
-                        completeFunctionCalls = true,
-                    },
-                },
-            })
-            vim.lsp.enable("ts_ls")
-
-            -- C#
-            vim.lsp.config("csharp_ls", {
-                capabilities = capabilities,
-                settings = {
-                    csharp = {
-                        solution = (function()
-                            -- Получаем корень от текущего файла
-                            local root = vim.fs.root(vim.api.nvim_buf_get_name(0), {
-                                "*.slnx",
-                                "*.sln",
-                                "*.csproj",
-                                "*.fsproj",
-                                ".git",
-                            })
-
-                            if root then
-                                local files = vim.fn.glob(root .. "/*.sln*", false, true)
-                                return files[1] or nil
-                            end
-                            return nil
-                        end)(),
-                        applyFormattingOptions = true,
-                    },
-                },
-            })
+            -- disabled for YANDEX
+            -- -- C#
+            -- vim.lsp.config("csharp_ls", {
+            --     capabilities = capabilities,
+            --     settings = {
+            --         csharp = {
+            --             solution = (function()
+            --                 -- Получаем корень от текущего файла
+            --                 local root = vim.fs.root(vim.api.nvim_buf_get_name(0), {
+            --                     "*.slnx",
+            --                     "*.sln",
+            --                     "*.csproj",
+            --                     "*.fsproj",
+            --                     ".git",
+            --                 })
+            --
+            --                 if root then
+            --                     local files = vim.fn.glob(root .. "/*.sln*", false, true)
+            --                     return files[1] or nil
+            --                 end
+            --                 return nil
+            --             end)(),
+            --             applyFormattingOptions = true,
+            --         },
+            --     },
+            -- })
 
             -- Comment this is you haven't dart installed in your path
             vim.lsp.config("dartls", {

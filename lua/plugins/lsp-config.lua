@@ -211,6 +211,7 @@ return {
 
             -- Comment this is you haven't dart installed in your path
             vim.lsp.config("dartls", {
+                cmd = { "dart", "language-server", "--protocol=lsp" },
                 capabilities = capabilities,
             })
             vim.lsp.enable("dartls")

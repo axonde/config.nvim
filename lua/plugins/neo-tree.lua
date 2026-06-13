@@ -7,6 +7,16 @@ return {
         "MunifTanjim/nui.nvim",
     },
     lazy = false,
+    filesystem = {
+        -- Включает поиск по частям пути (а не только по точному имени файла)
+        search_by_full_path = true,
+        -- Использует системные команды поиска (fd/find/rg)
+        use_libuv_file_watcher = true,
+
+        filters = {
+            max_depth = 99,
+        }
+    },
     config = function()
         vim.keymap.set('n', '<C-n>', ":Neotree toggle<CR>")
         vim.keymap.set('n', '<leader>n', ":Neotree focus<CR>")
